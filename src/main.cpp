@@ -46,6 +46,7 @@ int main() {
 
     /*
      * Ejemplo de una serialización del objeto Persona
+     * https://github.com/nlohmann/json
 
      {
         "nombre": "Ned Flanders",
