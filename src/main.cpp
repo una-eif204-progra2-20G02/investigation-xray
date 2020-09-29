@@ -1,121 +1,92 @@
 //
-// Created by deine on 9/21/2020.
+// Created by Maikol Guzman on 9/28/20.
 //
-#include <iostream>
-#include <sstream>
-#include <fstream> //usar las funciones de escritura y lectura
-#include <vector>
-#include "json.hpp"
 
-/*este ejemplo se basa en la publicacion de Daniel Gómez Vergel:
-Reflexión estática y serialización de agregados en JSON*/
+#include <../lib/nlohmann/json.hpp>
+#include <iostream>
 
 using namespace std;
+using json = nlohmann::json;
 
 struct Persona {
-
     string nombre;
     int edad;
     int id;
 
-    Persona() = default;
+    Persona() {}
 
-    Persona(string nombre, int edad, int id) : nombre(nombre), edad(edad), id(id) {}
+    Persona(const string &nombre, int edad, int id) : nombre(nombre), edad(edad), id(id) {}
+
+    const string &getNombre() const {
+        return nombre;
+    }
+
+    void setNombre(const string &nombre) {
+        Persona::nombre = nombre;
+    }
+
+    int getEdad() const {
+        return edad;
+    }
+
+    void setEdad(int edad) {
+        Persona::edad = edad;
+    }
+
+    int getId() const {
+        return id;
+    }
+
+    void setId(int id) {
+        Persona::id = id;
+    }
 };
-
-/*struct PersonaList{
-    vector<Persona> personasList;
-
-    void insertarPersona(Persona persona)
-    {
-        personasList.push_back(persona);
-    }
-
-    Persona consultarPorPosicion(int pos)
-    {
-        return personasList.operator[](pos);
-    }
-
-};*/
-
-auto to_json(nlohmann::json& json, Persona const& persona) -> void
-{
-    json = nlohmann::json{
-            {"nombre: ", persona.nombre},
-            {"Edad: ", persona.edad},
-            {"id: ", persona.id}
-    };
-}
-
-auto from_json(nlohmann::json const& json, Persona const& persona) -> void
-{
-    json.at("Nombre: ").get_to(persona.nombre);
-    json.at("Edad: ").get_to(persona.edad);
-    json.at("Id: ").get_to(persona.id);
-}
-
-/*void guardar(Persona persona) {
-    ofstream archivo;
-    try { archivo.open("ArchivoTexto.txt", ios::app); }
-    catch (std::ifstream::failure a) {
-        cout << "no se pudo abrir el archivo";
-        exit(1);
-    }
-    archivo << persona->toString() << endl;
-    archivo.close();
-}
-
-void leer() {
-    ifstream archivo;
-    string texto;
-    try { archivo.open("ArchivoTexto.txt", ios::in); }
-    catch (std::ifstream::failure a) {
-        cout << "no se pudo abrir el archivo";
-        exit(1);
-    }
-    cout << endl;
-    while (!archivo.eof()) {
-        getline(archivo, texto);
-        cout << texto << endl;
-    }
-    archivo.close();
-}*/
 
 int main() {
 
-/*PersonaList personasList =  PersonaList();
-personasList.insertarPersona(p1);
-personasList.insertarPersona(p2);
-personasList.insertarPersona(p3);
-personasList.insertarPersona(p4);*/
+    /*
+     * Ejemplo de una serialización del objeto Persona
 
-    Persona p1 =  Persona("Luis", 23, 1);
-    Persona p2 = Persona("Christofer", 19, 2);
-    Persona p3 = Persona("Deiner", 43, 3);
-    Persona p4 = Persona("Maikol", 45, 4);
+     {
+        "nombre": "Ned Flanders",
+        "edad": 18,
+        "id" : 60
+     }
 
-auto const personas = vector<Persona>{ p1, p2, p3, p4 };
+     */
 
-    if (auto ofs = ofstream{"persona.jsonl", std::ios::binary}){
-        for (auto const& persona : personas)
-        ofs << nlohmann::json(persona) << '\n'; // conversión Persona-->json
-    } else {
-        cout<< "no se pudo abrir el archivo\n";
-    }
+    Persona persona1 = {"Ned Flanders", 18, 60};
 
-    //    La invocación j.get<Persona>() --que llama implícitamente a la función from_json()--
-//    retorna finalmente el objeto Persona a insertar al fondo del vector.
+    // Convertir a JSON: Copia cada valor en un objeto JSON
+    json jsonPersona;
+    jsonPersona["nombre"] = persona1.getNombre();
+    jsonPersona["edad"] = persona1.getEdad();
+    jsonPersona["id"] = persona1.getId();
 
-    auto persona = vector<Persona>{}; // vector inicialmente vacío
+    // Convertir desde JSON: copia cada valor desde un objeto de JSON
+    Persona persona2;
+    persona2.setNombre(jsonPersona["nombre"]);
+    persona2.setEdad(jsonPersona["edad"]);
+    persona2.setId(jsonPersona["id"]);
 
-    if (auto ifs = ifstream{"persona.jsonl", std::ios::binary}) {
-        auto json_line = string{};
-        while (getline(ifs, json_line)) { // parseamos el fichero línea a línea
-            auto const j = nlohmann::json::parse(json_line);
-            persona.push_back(j.get<Persona>()); // conversión json-->Persona
-        }
-    } else {
-        cout << "no se pudo abrir el archivo\n";
-    }
+    // Convertir de un String de JSON
+    string data = R"({
+                        "nombre": "Ned Flanders",
+                        "edad": 18,
+                        "id" : 60
+                    })";
+
+    json jsonData = json::parse(data);
+    Persona persona3;
+    persona3.setNombre(jsonData["nombre"]);
+    persona3.setEdad(jsonData["edad"]);
+    persona3.setId(jsonData["id"]);
+
+    std::cout << "Hello, Universidad Nacional!" << std::endl;
+
+    std::cout << "Persona 1: " << persona1.nombre << std::endl;
+    std::cout << "Persona 2: " << persona2.nombre << std::endl;
+    std::cout << "Persona 3: " << persona3.nombre << std::endl;
+
     return 0;
-};
+}
