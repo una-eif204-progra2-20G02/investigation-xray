@@ -4,6 +4,7 @@
 
 #include <../lib/nlohmann/json.hpp>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 using json = nlohmann::json;
@@ -85,13 +86,39 @@ int main() {
     persona3.setEdad(jsonData["edad"]);
     persona3.setId(jsonData["id"]);
 
-    std::cout << "Hello, Universidad Nacional!" << std::endl;
+    //guarda el archivo
+    ofstream archivo;
+    try { archivo.open("ArchivoTexto.json", ios::binary); }
+    catch (std::ifstream::failure a) {
+        cout << "no se pudo abrir el archivo";
+        exit(1);
+    }
+    archivo << personaSerializado << '\n';
+    archivo.close();
+
+    //lee el archivo
+    ifstream archivo1;
+    string texto;
+    try { archivo1.open("ArchivoTexto.json", ios::binary); }
+    catch (std::ifstream::failure a) {
+        cout << "no se pudo abrir el archivo";
+        exit(1);
+    }
+    cout << endl;
+    while (!archivo1.eof()) {
+        getline(archivo1, texto);
+        cout << texto << endl;
+    }
+    archivo.close();
+
+
+/*std::cout << "Hello, Universidad Nacional!" << std::endl;
 
     std::cout << "Persona 1: " << persona1.nombre << std::endl;
     std::cout << "Persona 2: " << persona2.nombre << std::endl;
     std::cout << "Persona 3: " << persona3.nombre << std::endl;
 
-    std::cout << "Persona 1 - Serializado en JSON: " << personaSerializado << std::endl;
+    std::cout << "Persona 1 - Serializado en JSON: " << personaSerializado << std::endl;*/
 
     return 0;
 }
